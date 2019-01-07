@@ -1,0 +1,12 @@
+---
+- name: Validate Postfix configuration
+  command: postfix check
+  changed_when: false
+  listen:
+    - Reload Postfix
+
+- name: Reload Postfix
+  service:
+    name: "{{ postfix_service }}"
+    state: reloaded
+  when: postfix_state != "stopped"

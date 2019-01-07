@@ -1,0 +1,49 @@
+---
+- name: Install Postfix
+  apt:
+    name: "{{ postfix_package }}"
+    default_release: "{{ postfix_default_release }}"
+    state: present
+
+- name: Install Postfix SQLite extension
+  apt:
+    name: "{{ postfix_sqlite_package }}"
+    state: present
+  when: postfix_sqlite
+
+- name: Create main Postfix configuration file
+  template:
+    src: "{{ postfix_main_conf_template }}"
+    dest: "{{ postfix_main_conf_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload Postfix
+
+- name: Create master Postfix configuration file
+  template:
+    src: "{{ postfix_master_conf_template }}"
+    dest: "{{ postfix_master_conf_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Reload Postfix
+
+- name: Create Postfix lookup tables configuration files
+  copy:
+    content: "{{ item.1 }}"
+    dest: "{{ postfix_conf_dir }}/{{ item.0 }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ postfix_lookups|dictsort }}"
+  notify:
+    - Reload Postfix
+
+- name: Configure Postfix service
+  service:
+    name: "{{ postfix_service }}"
+    state: "{{ postfix_state }}"
+    enabled: "{{ postfix_enabled }}"

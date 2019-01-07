@@ -1,0 +1,17 @@
+---
+- hosts: instance
+  tasks:
+    - name: Install mailx for tests
+      apt:
+        name: bsd-mailx
+
+    - name: Create /etc/mailname
+      copy:
+        content: "{{ ansible_facts.hostname }}\n"
+        dest: /etc/mailname
+        owner: root
+        group: root
+        mode: 0644
+
+    - import_role:
+        name: postfix
